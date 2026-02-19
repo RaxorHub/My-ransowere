@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUPER DEWA SYSTEM</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
+
+body{
+background:linear-gradient(135deg,#000,#0b0b0b,#111);
+color:white;
+overflow:hidden;
+}
+
+/* Glow background */
+body:before{
+content:"";
+position:fixed;
+width:300px;height:300px;
+background:#00aaff;
+filter:blur(140px);
+top:-120px;right:-120px;
+opacity:0.4;
+animation:move 8s infinite alternate;
+}
+@keyframes move{
+from{transform:translateX(0);}
+to{transform:translateX(-200px);}
+}
+
+/* LOGIN */
+#loginPage{
+position:absolute;
+width:100%;height:100%;
+display:flex;justify-content:center;align-items:center;
+}
+.login-box{
+background:rgba(20,20,20,0.7);
+backdrop-filter:blur(20px);
+padding:40px;
+border-radius:20px;
+width:90%;max-width:400px;
+box-shadow:0 0 40px rgba(0,170,255,0.5);
+text-align:center;
+}
+.input{
+width:100%;padding:14px;margin:12px 0;
+background:#111;border:none;border-radius:10px;color:white;
+}
+.btn{
+width:100%;padding:14px;margin-top:10px;
+background:linear-gradient(90deg,#00aaff,#0088cc);
+border:none;border-radius:10px;color:black;font-weight:bold;
+cursor:pointer;transition:0.3s;
+}
+.btn:hover{transform:scale(1.05);}
+
+/* DASHBOARD */
+#dashboard{display:none;height:100vh;}
+
+.header{
+padding:15px;
+background:#111;
+text-align:center;
+box-shadow:0 0 20px #00aaff;
+position:relative;
+}
+.menu-btn{
+position:absolute;left:15px;top:15px;cursor:pointer;font-size:20px;
+}
+
+.sidebar{
+position:fixed;top:60px;left:0;
+width:220px;height:100%;
+background:#111;
+transition:0.3s;
+}
+.sidebar.collapsed{width:60px;}
+.sidebar a{
+display:block;padding:15px;color:#00aaff;
+text-decoration:none;border-bottom:1px solid #222;
+}
+.sidebar a:hover{background:#00aaff;color:black;}
+
+.content{
+margin-left:230px;padding:20px;
+height:calc(100vh - 60px);
+overflow:auto;
+transition:0.3s;
+}
+.content.full{margin-left:70px;}
+
+/* CARD */
+.card{
+background:rgba(30,30,30,0.8);
+padding:20px;margin-bottom:20px;
+border-radius:15px;
+box-shadow:0 0 20px rgba(0,170,255,0.3);
+}
+
+/* TOGGLE */
+.switch{
+position:relative;display:inline-block;width:55px;height:28px;
+}
+.switch input{opacity:0;}
+.slider{
+position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;
+background:#333;border-radius:34px;transition:.4s;
+}
+.slider:before{
+position:absolute;content:"";
+height:20px;width:20px;left:4px;bottom:4px;
+background:white;border-radius:50%;transition:.4s;
+}
+input:checked + .slider{background:#00aaff;}
+input:checked + .slider:before{transform:translateX(26px);}
+
+/* LOG BOX */
+#log{
+background:#000;padding:10px;
+height:120px;overflow:auto;
+font-size:12px;color:#00ffcc;
+border-radius:10px;
+}
+.stat-number{
+font-size:22px;color:#00aaff;font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage">
+<div class="login-box">
+<h2 style="color:#00aaff;">SUPER DEWA ACCESS</h2>
+<input type="text" id="user" class="input" placeholder="Username">
+<input type="password" id="pass" class="input" placeholder="Password">
+<input type="text" id="key" class="input" placeholder="Access Key">
+<button class="btn" onclick="login()">ENTER SYSTEM</button>
+<p id="msg" style="color:red;margin-top:10px;"></p>
+</div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+<div class="header">
+<span class="menu-btn" onclick="toggleSidebar()">☰</span>
+SUPER DEWA CONTROL PANEL
+</div>
+
+<div class="sidebar" id="sidebar">
+<a href="#">Dashboard</a>
+<a href="#">Automation</a>
+<a href="#">Scheduler</a>
+<a href="#">Bulk System</a>
+<a href="#">Security</a>
+</div>
+
+<div class="content" id="content">
+
+<div class="card">
+<h3>System Status</h3>
+<div>Messages Sent: <span id="sent" class="stat-number">0</span></div>
+<div>Auto Replies: <span id="reply" class="stat-number">0</span></div>
+</div>
+
+<div class="card">
+<h3>Auto Response Engine</h3>
+<label class="switch">
+<input type="checkbox" onchange="toggleAuto(this)">
+<span class="slider"></span>
+</label>
+</div>
+
+<div class="card">
+<h3>Message Scheduler (5s demo)</h3>
+<button class="btn" onclick="scheduleMessage()">Run Scheduler</button>
+</div>
+
+<div class="card">
+<h3>Bulk Sender Simulator</h3>
+<button class="btn" onclick="bulkSend()">Send 10 Messages</button>
+</div>
+
+<div class="card">
+<h3>Security Shield</h3>
+<label class="switch">
+<input type="checkbox" onchange="securityMode(this)">
+<span class="slider"></span>
+</label>
+</div>
+
+<div class="card">
+<h3>Activity Log</h3>
+<div id="log"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+let auto=false;
+let sentCount=0;
+let replyCount=0;
+
+/* LOGIN SYSTEM */
+function login(){
+let u=user.value;
+let p=pass.value;
+let k=key.value;
+
+let expiry=new Date("2026-12-31");
+
+if(u==="admin" && p==="dewa123" && k==="SUPERKEY"){
+if(new Date() < expiry){
+loginPage.style.display="none";
+dashboard.style.display="block";
+document.body.style.overflow="auto";
+log("Login success");
+}else{
+msg.innerHTML="Key expired!";
+}
+}else{
+msg.innerHTML="Invalid credentials!";
+}
+}
+
+/* SIDEBAR */
+function toggleSidebar(){
+sidebar.classList.toggle("collapsed");
+content.classList.toggle("full");
+}
+
+/* AUTO RESPONSE */
+function toggleAuto(el){
+auto=el.checked;
+log("Auto Response: "+(auto?"ON":"OFF"));
+}
+
+/* SCHEDULER */
+function scheduleMessage(){
+log("Scheduler started...");
+setTimeout(()=>{
+sentCount++;
+sent.innerHTML=sentCount;
+log("Scheduled message sent");
+},5000);
+}
+
+/* BULK SEND */
+function bulkSend(){
+for(let i=0;i<10;i++){
+sentCount++;
+}
+sent.innerHTML=sentCount;
+log("Bulk 10 messages sent");
+}
+
+/* SECURITY */
+function securityMode(el){
+log("Security Mode: "+(el.checked?"ACTIVE":"DISABLED"));
+}
+
+/* LOG SYSTEM */
+function log(text){
+let time=new Date().toLocaleTimeString();
+log.innerHTML+="["+time+"] "+text+"<br>";
+log.scrollTop=log.scrollHeight;
+}
+</script>
+
+</body>
+</html>
